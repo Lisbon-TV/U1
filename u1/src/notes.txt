@@ -1,0 +1,16 @@
+COMMANDS IN TERMINAL:
+
+React:
+    - npx create-react-app u1
+
+Bootstrap:
+    - npm i Bootstrap
+
+UUID:
+    - npm install uuid
+
+SASS:
+https://www.geeksforgeeks.org/how-to-import-sass-through-npm/
+    - npm i sass
+    - npm install node-sass
+    
