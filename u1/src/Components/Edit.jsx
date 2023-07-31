@@ -1,14 +1,14 @@
 import { KEY } from "../App";
 import { destroy } from "../Functions/LocalStorage";
 
-export default function Delete({ setDeleteData, deleteData, setLastUpdate }) {
+export default function Edit({ setDeleteData, deleteData, setLastUpdate }) {
   const doDestroy = (_) => {
     if (deleteData.money > 0) {
-      alert("This person has money in their bank account. Cannot delete.");
-    } else {
       destroy(KEY, deleteData.id);
       setDeleteData(null);
       setLastUpdate(Date.now());
+    } else {
+      alert("This person has zero money in their bank account. Cannot delete.");
     }
   };
   return (
@@ -16,9 +16,7 @@ export default function Delete({ setDeleteData, deleteData, setLastUpdate }) {
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">
-              You are about to delete the account!
-            </h5>
+            <h5 className="modal-title">Delete person</h5>
             <button
               type="button"
               className="btn-close"
@@ -26,7 +24,7 @@ export default function Delete({ setDeleteData, deleteData, setLastUpdate }) {
             ></button>
           </div>
           <div className="modal-body">
-            <p>Do you want to remove this account permanently?</p>
+            <p>Are you sure you want to delete this account holder?</p>
           </div>
           <div className="modal-footer">
             <button
@@ -41,7 +39,7 @@ export default function Delete({ setDeleteData, deleteData, setLastUpdate }) {
               className="btn btn-primary"
               onClick={doDestroy}
             >
-              Yes
+              Delete
             </button>
           </div>
         </div>

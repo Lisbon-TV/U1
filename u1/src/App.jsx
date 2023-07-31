@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import { get, store } from "./Functions/LocalStorage";
+
 import Delete from "./Components/Delete";
+import Edit from "./Components/Edit";
 
 export const KEY = "persons";
 
@@ -13,6 +17,10 @@ function App() {
   const [lastUpdate, setLastUpdate] = useState(Date.now());
 
   const [deleteData, setDeleteData] = useState(null);
+  const [editData, setEditData] = useState(null);
+
+  const [fundsInput, setFundsInput] = useState("");
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
   const handleChangeName = (e) => {
     setName(e.target.value);
@@ -22,7 +30,17 @@ function App() {
     setLastName(e.target.value);
   };
 
-  const createPersonInfo = (_) => {};
+  const createPersonInfo = (_) => {
+    const person = {
+      name,
+      lastName,
+      money: 0,
+    };
+    store(KEY, person);
+    setLastName("");
+    setName("");
+    setLastUpdate(Date.now());
+  };
 
   useEffect(
     (_) => {
@@ -31,13 +49,56 @@ function App() {
     [lastUpdate]
   );
 
+  const addFunds = () => {
+    if (selectedPerson && fundsInput) {
+      const updatedPersons = persons.map((person) => {
+        if (person.id === selectedPerson.id) {
+          return { ...person, money: person.money + parseInt(fundsInput) };
+        }
+        return person;
+      });
+      setPersons(updatedPersons);
+      setSelectedPerson(null);
+      setFundsInput("");
+    }
+  };
+
+  const subtractFunds = () => {
+    if (selectedPerson && fundsInput) {
+      const updatedPersons = persons.map((person) => {
+        if (person.id === selectedPerson.id) {
+          const updatedMoney = person.money - parseInt(fundsInput);
+          return {
+            ...person,
+            money: updatedMoney >= 0 ? updatedMoney : 0,
+          };
+        }
+        return person;
+      });
+      setPersons(updatedPersons);
+      setSelectedPerson(null);
+      setFundsInput("");
+    }
+  };
+
+  useEffect(() => {
+    if (persons) {
+      const sortedPersons = persons.slice().sort((a, b) => {
+        const lastNameA = a.lastName.toLowerCase();
+        const lastNameB = b.lastName.toLowerCase();
+        return lastNameA.localeCompare(lastNameB);
+      });
+      setPersons(sortedPersons);
+    }
+  }, [persons]);
+
   return (
     <>
       <div className="container text-center">
         <div className="row">
           <div className="col-4">
             <div className="card mt-4">
-              <h3 className="card-header">Add a New Account Holder</h3>
+              <h3 className="card-header">NEW ACCOUNT HOLDER</h3>
               <div className="card-body">
                 <fieldset>
                   <legend>First name</legend>
@@ -48,7 +109,7 @@ function App() {
                       onChange={handleChangeName}
                     />
                   </div>
-                  <legend>Last Name</legend>
+                  <legend>Last name</legend>
                   <div>
                     <input
                       type="text"
@@ -63,14 +124,15 @@ function App() {
           </div>
           <div className="col-8 mt-4">
             <div className="card">
-              <h1 className="card-header">Account Holders</h1>
+              <h1 className="card-header">ACCOUNT HOLDERS</h1>
               <div className="card-body">
                 <table className="table table-striped">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Last Name</th>
+                      <th>First name</th>
+                      <th>Last name</th>
                       <th>Ballance</th>
+                      <th></th>
                       <th></th>
                       <th></th>
                     </tr>
@@ -83,17 +145,37 @@ function App() {
                           <td>{person.lastName}</td>
                           <td>{person.money}</td>
                           <td>
+                            {selectedPerson &&
+                            selectedPerson.id === person.id ? (
+                              <div>
+                                <input
+                                  type="number"
+                                  value={fundsInput}
+                                  onChange={(e) =>
+                                    setFundsInput(e.target.value)
+                                  }
+                                  placeholder="Enter funds amount"
+                                />
+                              </div>
+                            ) : null}
+                          </td>
+                          <td>
+                            {selectedPerson &&
+                            selectedPerson.id === person.id ? (
+                              <>
+                                <button onClick={addFunds}>Credit</button>
+                                <button onClick={subtractFunds}>Debit</button>
+                              </>
+                            ) : (
+                              <button onClick={() => setSelectedPerson(person)}>
+                                Update ballance
+                              </button>
+                            )}
+                          </td>
+                          <td>
                             <button onClick={(_) => setDeleteData(person)}>
-                              Delete
+                              Delete account
                             </button>
-                          </td>
-                          <td>
-                            <div>
-                              <input type="number" />
-                            </div>
-                          </td>
-                          <td>
-                            <button>Edit</button>
                           </td>
                         </tr>
                       ))}
@@ -108,6 +190,13 @@ function App() {
         <Delete
           setDeleteData={setDeleteData}
           deleteData={deleteData}
+          setLastUpdate={setLastUpdate}
+        />
+      )}
+      {editData && (
+        <Edit
+          setEditData={setEditData}
+          editData={editData}
           setLastUpdate={setLastUpdate}
         />
       )}
